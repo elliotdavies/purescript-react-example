@@ -8,7 +8,13 @@
   "dependencies": {
     "purescript-react-dom": "^6.0.0",
     "purescript-console": "^4.0.0",
-    "purescript-react": "^6.0.0",
+    "purescript-react": "https://github.com/elliotdavies/purescript-react.git#refs",
     "purescript-web-html": "^1.0.0"
+  },
+  "resolutions": {
+    "purescript-web-dom": "^2.0.0",
+    "purescript-web-events": "^2.0.0",
+    "purescript-react": "refs",
+    "purescript-typelevel-prelude": "^4.0.0"
   }
 }
