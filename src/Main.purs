@@ -3,7 +3,6 @@ module Main where
 import Prelude
 
 import Effect (Effect)
-import Effect.Uncurried (mkEffectFn1)
 import Effect.Console as Console
 
 import Data.Array (snoc, modifyAt, elemIndex)
@@ -109,8 +108,10 @@ initialState domRef instanceRef
 
 refsClass :: React.ReactClass {}
 refsClass = React.component "App" \this -> do
-  domRef <- Ref.createDOMRef
+
+  domRef      <- Ref.createDOMRef
   instanceRef <- Ref.createInstanceRef
+
   pure
     { state: initialState domRef instanceRef
     , render: render this <$> React.getState this
@@ -127,12 +128,12 @@ refsClass = React.component "App" \this -> do
               [ Props._type "text"
               , Props.value text
               , Props.onChange $ changeHandler this
-              , Props.ref domRef
+              , Props.ref $ Ref.fromRef domRef
               ]
           
           -- DOM ref using callback
           , React.DOM.div
-              [ Props.callbackRef \nullableElement -> do
+              [ Props.ref $ Ref.fromEffect \nullableElement -> do
                   Console.log "DOM ref via callback:"
                   logAny nullableElement
               ]
@@ -141,12 +142,12 @@ refsClass = React.component "App" \this -> do
           
           -- Instance ref using createRef
           , React.createLeafElement classWithRef
-              { ref: Ref.withObjectRef instanceRef
+              { ref: Ref.fromRef instanceRef
               }
 
           -- Instance ref using callback
           , React.createLeafElement classWithRef
-              { ref: Ref.withCallbackRef \nullableInstance -> do
+              { ref: Ref.fromEffect \nullableInstance -> do
                   Console.log "Instance ref via callback:"
                   logAny nullableInstance
               }
