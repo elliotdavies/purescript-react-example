@@ -91,14 +91,18 @@ mainClass = React.component "Main" component
 ------------------------
 
 
+coerceNativeNode :: Ref.NativeNode -> HTMLElement
+coerceNativeNode = unsafeCoerce
+
+
 type State
-  = { domRef      :: Ref.Ref HTMLElement
+  = { domRef      :: Ref.Ref Ref.NativeNode
     , instanceRef :: Ref.Ref Ref.ReactInstance
     , text        :: String
     }
 
 
-initialState :: Ref.Ref HTMLElement -> Ref.Ref Ref.ReactInstance -> State
+initialState :: Ref.Ref Ref.NativeNode -> Ref.Ref Ref.ReactInstance -> State
 initialState domRef instanceRef
   = { domRef
     , instanceRef
@@ -133,9 +137,9 @@ refsClass = React.component "App" \this -> do
           
           -- DOM ref using callback
           , React.DOM.div
-              [ Props.ref $ Ref.fromEffect \nullableElement -> do
+              [ Props.ref $ Ref.fromEffect \callbackNodeRef -> do
                   Console.log "DOM ref via callback:"
-                  logAny nullableElement
+                  Ref.getCurrentRef callbackNodeRef >>= logAny
               ]
               [ React.DOM.text "div"
               ]
@@ -147,18 +151,18 @@ refsClass = React.component "App" \this -> do
 
           -- Instance ref using callback
           , React.createLeafElement classWithRef
-              { ref: Ref.fromEffect \nullableInstance -> do
+              { ref: Ref.fromEffect \callbackInstanceRef -> do
                   Console.log "Instance ref via callback:"
-                  logAny nullableInstance
+                  Ref.getCurrentRef callbackInstanceRef >>= logAny
               }
           ]
 
     -- Focus input field on mount
     componentDidMount this = do
       { domRef } <- React.getState this
-      maybeEl <- Ref.getCurrentRef domRef
-      case maybeEl of
-        Just el -> focus el
+      maybeNode <- Ref.getCurrentRef domRef
+      case maybeNode of
+        Just node -> focus $ coerceNativeNode node
         Nothing -> pure unit
 
     -- Debugging
